@@ -1,0 +1,1 @@
+# americor-test-task
