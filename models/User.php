@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\event\HistoryEventInterface;
+use app\models\traits\TranslateArrayValuesTrait;
 use Yii;
 use yii\db\ActiveRecord;
 
@@ -16,8 +18,10 @@ use yii\db\ActiveRecord;
  * @property integer $updated_at
  * @property string $statusText
  */
-class User extends ActiveRecord
+class User extends ActiveRecord implements HistoryEventInterface
 {
+    use TranslateArrayValuesTrait;
+
     const STATUS_DELETED = 0;
     const STATUS_HIDDEN = 1;
     const STATUS_ACTIVE = 10;
@@ -25,7 +29,7 @@ class User extends ActiveRecord
     /**
      * @inheritdoc
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%user}}';
     }
@@ -57,25 +61,25 @@ class User extends ActiveRecord
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
-        return [
-            'id' => Yii::t('app', 'ID'),
-            'username' => Yii::t('app', 'Username (login)'),
-            'statusText' => Yii::t('app', 'Status'),
-        ];
+        return self::translateArrayValues([
+            'id' => 'ID',
+            'username' => 'Username (login)',
+            'statusText' => 'Status',
+        ]);
     }
 
     /**
      * @return array
      */
-    public static function getStatusTexts()
+    public static function getStatusTexts(): array
     {
-        return [
-            self::STATUS_ACTIVE => Yii::t('app', 'Active'),
-            self::STATUS_DELETED => Yii::t('app', 'Deleted'),
-            self::STATUS_HIDDEN => Yii::t('app', 'Hidden'),
-        ];
+        return self::translateArrayValues([
+            self::STATUS_ACTIVE => 'Active',
+            self::STATUS_DELETED => 'Deleted',
+            self::STATUS_HIDDEN => 'Hidden'
+        ]);
     }
 
     /**
@@ -84,5 +88,12 @@ class User extends ActiveRecord
     public function getStatusText()
     {
         return self::getStatusTexts()[$this->status] ?? $this->status;
+    }
+
+    public function getEventList(): array
+    {
+        return self::translateArrayValues([
+            'change_status' => 'Change status'
+        ]);
     }
 }

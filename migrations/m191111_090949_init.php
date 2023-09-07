@@ -57,8 +57,8 @@ class m191111_090949_init extends Migration
             'user_id' => $this->integer()->null(),
             'customer_id' => $this->integer()->notNull(),
             'status' => $this->smallInteger()->notNull()->defaultValue(0),
-            'phone_from' => $this->string()->null(),
-            'phone_to' => $this->string()->null(),
+            'from' => $this->string()->null(),
+            'to' => $this->string()->null(),
             'comment' => $this->text(),
         ], $tableOptions);
 
@@ -84,8 +84,8 @@ class m191111_090949_init extends Migration
             'user_id' => $this->integer()->null(),
             'customer_id' => $this->integer()->notNull(),
             'status' => $this->smallInteger()->notNull()->defaultValue(0),
-            'phone_from' => $this->string()->null(),
-            'phone_to' => $this->string()->null(),
+            'from' => $this->string()->null(),
+            'to' => $this->string()->null(),
             'message' => $this->text(),
             'direction' => $this->tinyInteger(),
         ], $tableOptions);

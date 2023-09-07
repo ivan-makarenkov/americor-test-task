@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\event\HistoryEventInterface;
+use app\models\traits\TranslateArrayValuesTrait;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -33,8 +35,10 @@ use yii\db\ActiveRecord;
  * @property string $isInbox
  * @property string $statusText
  */
-class Task extends ActiveRecord
+class Task extends ActiveRecord implements HistoryEventInterface
 {
+    use TranslateArrayValuesTrait;
+
     const STATUS_NEW = 0;
     const STATUS_DONE = 1;
     const STATUS_CANCEL = 3;
@@ -46,7 +50,7 @@ class Task extends ActiveRecord
     /**
      * @inheritdoc
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%task}}';
     }
@@ -54,7 +58,7 @@ class Task extends ActiveRecord
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['user_id', 'title'], 'required'],
@@ -69,26 +73,26 @@ class Task extends ActiveRecord
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
-        return [
-            'id' => Yii::t('app', 'ID'),
-            'user_id' => Yii::t('app', 'User'),
-            'customer_id' => Yii::t('app', 'Customer ID'),
-            'status' => Yii::t('app', 'Status'),
-            'title' => Yii::t('app', 'Title'),
-            'text' => Yii::t('app', 'Description'),
-            'due_date' => Yii::t('app', 'Due Date'),
-            'formatted_due_date' => Yii::t('app', 'Due Date'),
-            'priority' => Yii::t('app', 'Priority'),
-            'ins_ts' => Yii::t('app', 'Ins Ts'),
-        ];
+        return self::translateArrayValues([
+            'id' => 'ID',
+            'user_id' => 'User',
+            'customer_id' => 'Customer ID',
+            'status' => 'Status',
+            'title' => 'Title',
+            'text' => 'Description',
+            'due_date' => 'Due Date',
+            'formatted_due_date' => 'Due Date',
+            'priority' => 'Priority',
+            'ins_ts' => 'Ins Ts'
+        ]);
     }
 
     /**
      * @return ActiveQuery
      */
-    public function getCustomer()
+    public function getCustomer(): ActiveQuery
     {
         return $this->hasOne(Customer::class, ['id' => 'customer_id']);
     }
@@ -96,7 +100,7 @@ class Task extends ActiveRecord
     /**
      * @return ActiveQuery
      */
-    public function getUser()
+    public function getUser(): ActiveQuery
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
     }
@@ -104,13 +108,13 @@ class Task extends ActiveRecord
     /**
      * @return array
      */
-    public static function getStatusTexts()
+    public static function getStatusTexts(): array
     {
-        return [
-            self::STATUS_NEW => Yii::t('app', 'New'),
-            self::STATUS_DONE => Yii::t('app', 'Complete'),
-            self::STATUS_CANCEL => Yii::t('app', 'Cancel'),
-        ];
+        return self::translateArrayValues([
+            self::STATUS_NEW => 'New',
+            self::STATUS_DONE => 'Complete',
+            self::STATUS_CANCEL => 'Cancel'
+        ]);
     }
 
     /**
@@ -135,11 +139,11 @@ class Task extends ActiveRecord
      */
     public static function getStateTexts()
     {
-        return [
-            self::STATE_INBOX => Yii::t('app', 'Inbox'),
-            self::STATE_DONE => Yii::t('app', 'Done'),
-            self::STATE_FUTURE => Yii::t('app', 'Future')
-        ];
+        return self::translateArrayValues([
+            self::STATE_INBOX => 'Inbox',
+            self::STATE_DONE => 'Done',
+            self::STATE_FUTURE => 'Future'
+        ]);
     }
 
     /**
@@ -150,11 +154,10 @@ class Task extends ActiveRecord
         return self::getStateTexts()[$this->state] ?? $this->state;
     }
 
-
     /**
      * @return bool
      */
-    public function getIsOverdue()
+    public function getIsOverdue(): bool
     {
         return $this->status !== self::STATUS_DONE && strtotime($this->due_date) < time();
     }
@@ -162,8 +165,17 @@ class Task extends ActiveRecord
     /**
      * @return bool
      */
-    public function getIsDone()
+    public function getIsDone(): bool
     {
         return $this->status == self::STATUS_DONE;
+    }
+
+    public function getEventList(): array
+    {
+        return self::translateArrayValues([
+            'created' => 'Task created',
+            'updated' =>' Task updated',
+            'completed' => 'Task completed'
+        ]);
     }
 }

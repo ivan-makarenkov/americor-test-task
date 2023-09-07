@@ -21,11 +21,9 @@ trait ObjectNameTrait
     ];
 
     /**
-     * @param $name
-     * @param bool $throwException
      * @return mixed
      */
-    public function getRelation($name, $throwException = true)
+    public function getRelation(string $name, bool $throwException = true)
     {
         $getter = 'get' . $name;
         $class = self::getClassNameByRelation($name);
@@ -37,11 +35,7 @@ trait ObjectNameTrait
         return parent::getRelation($name, $throwException);
     }
 
-    /**
-     * @param $className
-     * @return mixed
-     */
-    public static function getObjectByTableClassName($className)
+    private static function getObjectByTableClassName(string $className): string
     {
         if (method_exists($className, 'tableName')) {
             return str_replace(['{', '}', '%'], '', $className::tableName());
@@ -50,11 +44,7 @@ trait ObjectNameTrait
         return $className;
     }
 
-    /**
-     * @param $relation
-     * @return string|null
-     */
-    public static function getClassNameByRelation($relation)
+    private static function getClassNameByRelation(string $relation): ?string
     {
         foreach (self::$classes as $class) {
             if (self::getObjectByTableClassName($class) == $relation) {
@@ -62,5 +52,17 @@ trait ObjectNameTrait
             }
         }
         return null;
+    }
+
+    /**
+     * @return string[]
+     */
+    protected static function getRelationNames(): array
+    {
+        $result = [];
+        foreach (self::$classes as $class) {
+            $result[] = self::getObjectByTableClassName($class);
+        }
+        return $result;
     }
 }
