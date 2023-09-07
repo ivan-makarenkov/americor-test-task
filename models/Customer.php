@@ -3,6 +3,8 @@
 namespace app\models;
 
 
+use app\models\event\HistoryEventInterface;
+use app\models\traits\TranslateArrayValuesTrait;
 use Yii;
 use yii\db\ActiveRecord;
 
@@ -13,8 +15,10 @@ use yii\db\ActiveRecord;
  * @property integer $id
  * @property string $name
  */
-class Customer extends ActiveRecord
+class Customer extends ActiveRecord implements HistoryEventInterface
 {
+    use TranslateArrayValuesTrait;
+
     const QUALITY_ACTIVE = 'active';
     const QUALITY_REJECTED = 'rejected';
     const QUALITY_COMMUNITY = 'community';
@@ -28,7 +32,7 @@ class Customer extends ActiveRecord
     /**
      * @inheritdoc
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%customer}}';
     }
@@ -36,42 +40,42 @@ class Customer extends ActiveRecord
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            [['name'], 'string', 'max' => 255],
+            [['name'], 'string', 'max' => 255]
         ];
     }
 
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
-        return [
-            'name' => Yii::t('app', 'Name'),
-        ];
+        return self::translateArrayValues([
+            'name' => 'Name',
+        ]);
     }
 
     /**
      * @return array
      */
-    public static function getQualityTexts()
+    public static function getQualityTexts(): array
     {
-        return [
-            self::QUALITY_ACTIVE => Yii::t('app', 'Active'),
-            self::QUALITY_REJECTED => Yii::t('app', 'Rejected'),
-            self::QUALITY_COMMUNITY => Yii::t('app', 'Community'),
-            self::QUALITY_UNASSIGNED => Yii::t('app', 'Unassigned'),
-            self::QUALITY_TRICKLE => Yii::t('app', 'Trickle'),
-        ];
+        return self::translateArrayValues([
+            self::QUALITY_ACTIVE =>'Active',
+            self::QUALITY_REJECTED =>'Rejected',
+            self::QUALITY_COMMUNITY =>'Community',
+            self::QUALITY_UNASSIGNED =>'Unassigned',
+            self::QUALITY_TRICKLE =>'Trickle',
+        ]);
     }
 
     /**
      * @param $quality
      * @return mixed|null
      */
-    public static function getQualityTextByQuality($quality)
+    public static function getQualityText($quality)
     {
         return self::getQualityTexts()[$quality] ?? $quality;
     }
@@ -79,21 +83,29 @@ class Customer extends ActiveRecord
     /**
      * @return array
      */
-    public static function getTypeTexts()
+    public static function getTypeTexts(): array
     {
-        return [
-            self::TYPE_LEAD => Yii::t('app', 'Lead'),
-            self::TYPE_DEAL => Yii::t('app', 'Deal'),
-            self::TYPE_LOAN => Yii::t('app', 'Loan'),
-        ];
+        return self::translateArrayValues([
+            self::TYPE_LEAD =>'Lead',
+            self::TYPE_DEAL =>'Deal',
+            self::TYPE_LOAN =>'Loan',
+        ]);
     }
 
     /**
      * @param $type
      * @return mixed
      */
-    public static function getTypeTextByType($type)
+    public static function getTypeText($type)
     {
         return self::getTypeTexts()[$type] ?? $type;
+    }
+
+    public function getEventList(): array
+    {
+        return self::translateArrayValues([
+            'type_changed' =>'Type changed',
+            'quantity_changed' =>'Property changed',
+        ]);
     }
 }

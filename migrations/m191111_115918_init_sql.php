@@ -12,7 +12,6 @@ class m191111_115918_init_sql extends Migration
         'user',
         'history',
         'sms',
-
         'task',
         'call',
         'fax',
